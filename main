@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Criador de Ficha - Fábulas Ultima</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c;
+            color: #e2e8f0;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 960px;
+        }
+        .card {
+            background-color: #2d3748;
+            border-radius: 1rem;
+            padding: 1.5rem;
+        }
+        .input-group label {
+            font-weight: 700;
+        }
+        .input-group input, .input-group select {
+            background-color: #4a5568;
+            border-color: #4a5568;
+            color: #e2e8f0;
+        }
+        .btn {
+            background-color: #4299e1;
+            color: #ffffff;
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            transition: background-color 0.2s ease-in-out;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+        .btn-remove {
+            background-color: #e53e3e;
+            color: #ffffff;
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+            transition: background-color 0.2s ease-in-out;
+        }
+        .btn-remove:hover {
+            background-color: #c53030;
+        }
+        .btn:hover {
+            background-color: #3182ce;
+        }
+        .dice-selector, .class-selector, .power-selector, .heroic-power-selector {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background: #4a5568 url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23e2e8f0' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e") no-repeat right 0.75rem center/1.25rem 1.25rem;
+        }
+        .stat-output {
+            background-color: #2d3748;
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            font-size: 1.125rem;
+            font-weight: 700;
+        }
+        #export-output {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: monospace;
+            background-color: #1a202c;
+            border: 1px solid #4a5568;
+            padding: 1rem;
+            border-radius: 0.5rem;
+        }
+        .power-level-controls {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .power-level-btn {
+            background-color: #63b3ed;
+            color: white;
+            border-radius: 9999px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            line-height: 1;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .power-level-btn:hover {
+            background-color: #4299e1;
+        }
+        .power-level-display {
+            width: 32px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="p-6">
+
+<div id="app" class="container mx-auto">
+    <h1 class="text-4xl font-bold text-center mb-6 text-yellow-400">Criador de Ficha - Fábulas Ultima</h1>
+    <p class="text-center mb-10 text-gray-400">Crie seu herói interativo e exporte sua ficha completa.</p>
+
+    <div class="space-y-8">
+        <!-- Informações do Personagem -->
+        <div class="card">
+            <h2 class="text-2xl font-bold mb-4">Informações do Personagem</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="input-group">
+                    <label for="char-name" class="block text-sm">Nome</label>
+                    <input type="text" id="char-name" class="w-full mt-1 p-2 rounded-lg border">
+                </div>
+                <div class="input-group">
+                    <label for="char-identity" class="block text-sm">Identidade</label>
+                    <input type="text" id="char-identity" class="w-full mt-1 p-2 rounded-lg border">
+                </div>
+                <div class="input-group">
+                    <label for="char-theme" class="block text-sm">Tema</label>
+                    <input type="text" id="char-theme" class="w-full mt-1 p-2 rounded-lg border">
+                </div>
+                <div class="input-group">
+                    <label for="char-origin" class="block text-sm">Origem</label>
+                    <input type="text" id="char-origin" class="w-full mt-1 p-2 rounded-lg border">
+                </div>
+            </div>
+        </div>
+
+        <!-- Atributos -->
+        <div class="card">
+            <h2 class="text-2xl font-bold mb-4">Atributos e Dados</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="input-group">
+                    <label for="des-dice" class="block text-sm">Destreza (DES)</label>
+                    <select id="des-dice" class="dice-selector w-full mt-1 p-2 rounded-lg border">
+                        <option value="6">d6</option>
+                        <option value="8">d8</option>
+                        <option value="10">d10</option>
+                        <option value="12">d12</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="vig-dice" class="block text-sm">Vigor (VIG)</label>
+                    <select id="vig-dice" class="dice-selector w-full mt-1 p-2 rounded-lg border">
+                        <option value="6">d6</option>
+                        <option value="8">d8</option>
+                        <option value="10">d10</option>
+                        <option value="12">d12</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="ast-dice" class="block text-sm">Astúcia (AST)</label>
+                    <select id="ast-dice" class="dice-selector w-full mt-1 p-2 rounded-lg border">
+                        <option value="6">d6</option>
+                        <option value="8">d8</option>
+                        <option value="10">d10</option>
+                        <option value="12">d12</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="von-dice" class="block text-sm">Vontade (VON)</label>
+                    <select id="von-dice" class="dice-selector w-full mt-1 p-2 rounded-lg border">
+                        <option value="6">d6</option>
+                        <option value="8">d8</option>
+                        <option value="10">d10</option>
+                        <option value="12">d12</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Nível, Classes e Poderes -->
+        <div class="card">
+            <h2 class="text-2xl font-bold mb-4">Classes e Níveis</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="input-group col-span-3">
+                    <label for="level" class="block text-sm">Nível do Personagem</label>
+                    <input type="number" id="level" value="1" min="1" max="50" class="w-full mt-1 p-2 rounded-lg border">
+                </div>
+            </div>
+            <p class="text-sm text-gray-400 mt-2">Níveis totais distribuídos: <span id="total-levels">0</span>/<span id="max-levels">1</span></p>
+
+            <div id="class-container" class="mt-4 space-y-4">
+            </div>
+            <button id="add-class-btn" class="mt-4 btn">Adicionar Classe</button>
+        </div>
+        
+        <!-- Poderes Heroicos -->
+        <div class="card">
+            <h2 class="text-2xl font-bold mb-4">Poderes Heróicos</h2>
+            <div id="heroic-powers-container" class="mt-4 space-y-4">
+            </div>
+            <button id="add-heroic-power-btn" class="mt-4 btn">Adicionar Poder Heróico</button>
+        </div>
+
+        <!-- Laços -->
+        <div class="card">
+            <h2 class="text-2xl font-bold mb-4">Laços</h2>
+            <div id="lacos-container" class="mt-4 space-y-4">
+                <!-- Laços will be dynamically added here -->
+            </div>
+            <button id="add-laco-btn" class="mt-4 btn">Adicionar Laço</button>
+        </div>
+
+        <!-- Resumo de Atributos e Equipamentos -->
+        <div class="card">
+            <h2 class="text-2xl font-bold mb-4">Resumo e Estatísticas</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="stat-output">PV Máximos: <span id="pv-max">0</span></div>
+                <div class="stat-output">PM Máximos: <span id="pm-max">0</span></div>
+                <div class="stat-output">PI Máximos: <span id="pi-max">0</span></div>
+                <div class="stat-output">Iniciativa: <span id="initiative">0</span></div>
+                <div class="stat-output">Defesa: <span id="defense">0</span></div>
+                <div class="stat-output">Defesa Mágica: <span id="magic-defense">0</span></div>
+            </div>
+
+            <div class="mt-6">
+                <h3 class="text-xl font-bold mb-2">Equipamentos Disponíveis</h3>
+                <p>Valor total de Zênites para equipamento: <span id="zenith-budget">500</span></p>
+                <div id="equipment-options" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <!-- Equipments will be dynamically added here -->
+                </div>
+            </div>
+
+            <div class="mt-6">
+                <h3 class="text-xl font-bold mb-2">Equipamentos Comprados</h3>
+                <ul id="purchased-equipment-list" class="space-y-2">
+                    <!-- Purchased equipment will be listed here -->
+                </ul>
+            </div>
+        </div>
+
+        <!-- Exportar Ficha -->
+        <div class="card">
+            <h2 class="text-2xl font-bold mb-4">Exportar Ficha</h2>
+            <button id="download-json-btn" class="btn w-full">Baixar Ficha (JSON)</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const classes = [
+        { name: "Andarilho", bonus: { pv: 0, pm: 0, pi: 2 }, powers: [{ name: "CAÇADOR DE TESOUROS", mult: 2, desc: "Quando seu grupo se aventura pelo mapa do mundo, você faz uma descoberta se tirar 【NP + 1】 ou menos na rolagem de viagem (em vez de apenas 1)." }, { name: "COMPANHEIRO FIEL", mult: 5, desc: "Com a ajuda do grupo, crie um NPC (veja a p. 302)..." }, { name: "PAPO DE TAVERNA", mult: 3, desc: "Ao descansar em uma estalagem ou taverna, você pode fazer 【NP】 perguntas ao mestre sobre os arredores e habitantes. O mestre deve responder com informações verdadeiras..." }, { name: "PRÁTICO", mult: 4, desc: "Você recupera 【NP】 PI após cada rolagem de viagem (veja a página 106)." }, { name: "VIAJANTE", mult: 1, desc: "Você reduz o dado rolado em suas rolagens de viagem em um (mínimo d6)." }] },
+        { name: "Arcanista", bonus: { pv: 0, pm: 5, pi: 0 }, powers: [{ name: "ARCANISMO RITUALISTA", mult: 1, desc: "Você pode fazer rituais da disciplina arcanismo..." }, { name: "ARCANO EMERGENCIAL", mult: 6, desc: "Enquanto estiver em crise, o custo de invocar seu Arcano é reduzido em 【NP × 5】." }, { name: "CÍRCULO ARCANO", mult: 4, desc: "Em seu turno, após dispensar voluntariamente um Arcano durante um conflito, se esse Arcano não foi invocado durante esse mesmo turno e você tem uma arma arcana equipada, você pode imediatamente fazer a ação Feitiço sem custo de ação..." }, { name: "REGENERAÇÃO ARCANA", mult: 2, desc: "Ao invocar um Arcano, você imediatamente recupera 【NP × 5】 PV." }, { name: "VINCULAR E INVOCAR", mult: 1, desc: "Você pode vincular Arcanos à sua alma para invocá-los em um momento posterior." }] },
+        { name: "Atirador", bonus: { pv: 5, pm: 0, pi: 0 }, powers: [{ name: "BARRAGEM", mult: 1, desc: "Ao fazer um ataque à distância, você pode gastar 10 PM para escolher uma opção: o ataque ganha multi (2); ou você aumenta em +1 a propriedade multi do ataque, até o máximo de multi (3)." }, { name: "FOGO CRUZADO", mult: 1, desc: "Quando uma criatura que você possa ver faz um ataque à distância, pode gastar um total de PM igual ao teste de Precisão dela para fazer o ataque falhar automaticamente contra todos os alvos." }, { name: "MAESTRIA COM ARMAS À DISTÂNCIA", mult: 4, desc: "Você ganha um bônus igual a 【NP】 em testes de Precisão à distância." }, { name: "OLHOS DE ÁGUIA", mult: 5, desc: "Quando faz a ação Guarda, se escolher não dar cobertura a outra criatura, você pode escolher uma opção: o próximo ataque à distância que você fizer na cena atual causa 【NP × 2】 de dano adicional ou você pode imediatamente fazer um ataque livre..." }, { name: "TIRO DE AVISO", mult: 4, desc: "Depois de atingir um ou mais alvos com um ataque à distância, você pode escolher não causar dano..." }] },
+        { name: "Elementalista", bonus: { pv: 0, pm: 5, pi: 0 }, powers: [{ name: "ARTILHARIA MÁGICA", mult: 3, desc: "Quando lança um feitiço ofensivo (r) com uma arma arcana equipada, você recebe um bônus igual a 【NP × 2】 no teste de Magia." }, { name: "CATACLISMO", mult: 3, desc: "Quando lança um feitiço de duração “instantânea” com uma arma arcana equipada, você pode aumentar o custo total de PM do feitiço em até 【NP × 10】 PM. Se fizer isso e o feitiço causar dano a uma criatura ou mais, para cada 10 PM com os quais o custo do feitiço foi aumentado, cada criatura sofre +5 pontos de dano." }, { name: "ELEMENTALISMO RITUALISTA", mult: 1, desc: "Você pode fazer rituais da disciplina elementalismo. Rituais de elementalismo usam 【AST + VON】 no teste de Magia." }, { name: "LÂMINA MÁGICA", mult: 4, desc: "Quando lança um feitiço ofensivo (r) com custo total de PM igual ou inferior a 【NP × 10】, cujo alvo é uma única criatura, e você está usando uma arma das categorias adaga, arco, espada, lança, luta ou malho, pode usar a fórmula do teste de Precisão da arma equipada em vez do teste de Magia..." }, { name: "MAGIA ELEMENTAL", mult: 10, desc: "Sempre que adquirir este poder, aprenda um feitiço de Elementalista (pp. 188-189). Feitiços ofensivos (r) de Elementalista usam 【AST + VON】 no teste de Magia." }] },
+        { name: "Entropista", bonus: { pv: 0, pm: 5, pi: 0 }, powers: [{ name: "ABSORVER PM", mult: 5, desc: "Depois de sofrer dano, você pode imediatamente recuperar 【NP × 2】 PM." }, { name: "ENTROPISMO RITUALISTA", mult: 1, desc: "Você pode fazer rituais da disciplina entropismo. Rituais de entropismo usam 【AST + VON】 no teste de Magia." }, { name: "MAGIA ENTRÓPICA", mult: 10, desc: "Sempre que adquirir este poder, aprenda um feitiço de Entropista (pp. 192-193). Feitiços ofensivos (r) de Entropista usam 【AST + VON】 no teste de Magia." }, { name: "SETE DA SORTE", mult: 1, desc: "Você tem um número da sorte; no início de cada sessão, esse número é 7. Uma vez por cena, após fazer um teste, você pode substituir o valor de um dado que rolou pelo seu número da sorte (mesmo que isso lhe dê um resultado impossível, como um 7 em um d6). Se fizer isso, o valor substituído torna-se o seu novo número da sorte." }, { name: "TEMPO ROUBADO", mult: 4, desc: "Durante um conflito, você pode gastar uma ação e até 【NP × 5】 PM para interferir no fluxo temporal. Para cada 5 PM gastos dessa forma, escolha uma opção..." }] },
+        { name: "Erudito", bonus: { pv: 0, pm: 5, pi: 0 }, powers: [{ name: "ANÁLISE RÁPIDA", mult: 6, desc: "No início de um conflito, você pode gastar até 【NP × 5】 PM. Para cada 5 PM gastos dessa forma, escolha uma opção: escolha uma criatura que você possa ver e o mestre revela um dos Traços dela; ou escolha um tipo de dano e uma criatura que você possa ver e o mestre revela a Afinidade dela ao tipo escolhido." }, { name: "CONCENTRADO", mult: 5, desc: "Aumente permanentemente seus PM máximos em 【NP × 3】. Ao fazer um teste aberto usando 【AST + AST】, você ganha um bônus igual a 【NP】 naquele teste (funciona apenas em testes abertos)." }, { name: "CONHECIMENTO É PODER", mult: 1, desc: "Quando faz um teste de Precisão, você pode substituir um de seus dados de Atributo por Astúcia." }, { name: "LAMPEJO DE SABER", mult: 3, desc: "Quando tira 13 ou mais em um teste para investigar uma criatura, item ou local — inclusive na ação Estudo —, você pode fazer até 【NP】 perguntas ao mestre sobre o tópico de sua investigação." }, { name: "MEMÓRIA TREINADA", mult: 1, desc: "Você pode lembrar com perfeição dos detalhes de qualquer cena em que tenha estado na última semana. Você pode “voltar no tempo” dentro de sua mente para examinar ou investigar essas cenas de novo..." }] },
+        { name: "Espiritualista", bonus: { pv: 0, pm: 5, pi: 0 }, powers: [{ name: "ESPIRITUALISMO RITUALISTA", mult: 1, desc: "Você pode fazer rituais da disciplina espiritualismo. Rituais de espiritualismo usam 【AST + VON】 no teste de Magia." }, { name: "MAGIA DE SUPORTE", mult: 1, desc: "Quando lança um feitiço que tenha como alvo um ou mais aliados, se estiver com uma arma arcana equipada, escolha um destes aliados com quem você tenha um Laço. O aliado ganha um bônus igual à força do seu Laço com ele no próximo teste que fizer até o fim da cena." }, { name: "MAGIA ESPIRITUAL", mult: 10, desc: "Sempre que adquirir este poder, aprenda um feitiço de Espiritualista (pp. 198-199). Feitiços ofensivos (r) de Espiritualista usam 【AST + VON】 no teste de Magia." }, { name: "PODER CURATIVO", mult: 2, desc: "Quando lança um feitiço que tenha como alvo um ou mais aliados, se estiver com uma arma arcana equipada, cada aliado alvo recupera uma quantidade de PV igual a 【NP multiplicado pelo número de Laços que você tem】." }, { name: "VISMAGUS", mult: 1, desc: "Quando lança um feitiço, caso não tenha PM para pagar seu custo total, em vez disso, você pode gastar duas vezes essa quantidade em PV. Não é possível usar este poder se ele o deixaria com 0 PV." }] },
+        { name: "Furioso", bonus: { pv: 5, pm: 0, pi: 0 }, powers: [{ name: "ADRENALINA", mult: 5, desc: "Enquanto estiver em crise, você causa 【NP × 2】 de dano adicional (seja através de ataques, feitiços, Arcanos, itens ou qualquer outro método)." }, { name: "ESPÍRITO INDOMÁVEL", mult: 4, desc: "Quando gasta um ou mais Pontos de Fabula, você recebe um benefício adicional — escolha um: você recupera 【NP × 5】 PV; ou você recupera 【NP × 5】 PM; ou você se recupera de uma única condição à sua escolha." }, { name: "FRENESI", mult: 1, desc: "Seus testes de Precisão com adaga, luta, malho e armas de arremesso contam como um sucesso crítico se ambos os dados mostrarem um mesmo número, qualquer que seja (contanto que o teste não seja uma falha crítica)." }, { name: "PROVOCAR", mult: 5, desc: "Você pode gastar uma ação e 5 PM para fazer um teste oposto de 【VIG + VON】 contra uma criatura que você possa ver — descreva de que maneira a provoca! Se passar, o alvo fica enfurecido e é compelido a se concentrar em você... Você ganha um bônus igual a 【NP】 em testes de 【VIG + VON】 para este poder." }, { name: "RESISTIR", mult: 5, desc: "Quando faz a ação Guarda, se você escolher não dar cobertura a outra criatura, recupere uma quantidade de PV igual a 【NP multiplicado pela maior força de Laço que tiver】 e escolha Vigor ou Vontade. Até o fim do seu próximo turno, o dado atual do Atributo escolhido é considerado um passo maior (máximo de d12)." }] },
+        { name: "Guerreiro Sombrio", bonus: { pv: 5, pm: 0, pi: 0 }, powers: [{ name: "AGONIA", mult: 5, desc: "Quando causa dano a uma ou mais criaturas, se tiver um Laço com pelo menos uma delas, você recupera 【NP × 2】 PV e 【NP × 2】 PM." }, { name: "CORAÇÃO DA ESCURIDÃO", mult: 1, desc: "Uma vez por cena, quando entra em crise, escolha uma criatura específica que você possa ver e com a qual não tenha um Laço; você cria um Laço de ódio para com a criatura escolhida." }, { name: "GOLPE DAS SOMBRAS", mult: 5, desc: "Você aprendeu a canalizar sua força vital em seus ataques, usando uma ação para fazer um Golpe das Sombras: você rola seu dado atual de Vigor e perde uma quantidade de PV igual ao resultado. Se isto não reduzir seus PV a 0, você pode fazer um ataque livre com uma arma equipada; se atingir um ou mais alvos, você causa dano adicional igual a 【NP + número rolado no dado de Vigor】. Esse ataque causa dano de trevas e seu tipo não pode ser alterado." }, { name: "LIÇÃO DOLOROSA", mult: 3, desc: "Quando outra criatura faz você perder PV (com um ataque, feitiço ou qualquer outro método), você pode fazer a ação Estudo (veja a página 70) imediatamente, tendo-a como alvo. Se fizer isso, faz o teste com um bônus igual a 【NP】." }, { name: "SANGUE DAS TREVAS", mult: 1, desc: "Enquanto estiver em crise, você tem Resistência a dano de trevas e de veneno." }] },
+        { name: "Guardião", bonus: { pv: 5, pm: 0, pi: 0 }, powers: [{ name: "DUPLO ESCUDEIRO", mult: 1, desc: "Você se torna capaz de equipar um escudo em seu espaço de mão dominante. Enquanto tiver dois escudos equipados, você ganha os benefícios de ambos os itens e pode tratá-los como a seguinte arma de luta de duas mãos..." }, { name: "FORTALEZA", mult: 5, desc: "Aumente permanentemente seus PV máximos em 【NP × 3】." }, { name: "GUARDA-COSTAS", mult: 1, desc: "Se você fizer a ação Guarda e escolher dar cobertura a outra criatura, essa criatura ganha Resistência a todos os tipos de dano até o início de seu próximo turno." }, { name: "MAESTRIA DEFENSIVA", mult: 5, desc: "Enquanto tiver um escudo ou armadura marcial equipada, todo o dano que você sofrer é reduzido em 【NP】 (aplicado antes de Afinidades a dano)." }, { name: "PROTEGER", mult: 1, desc: "Quando outra criatura é ameaçada por um ataque, feitiço ou outro perigo, você pode tomar o lugar dela. Quaisquer testes que forem parte do perigo serão realizados contra você..." }] },
+        { name: "Inventor", bonus: { pv: 0, pm: 0, pi: 2 }, powers: [{ name: "CHUVA DE POÇÕES", mult: 2, desc: "Quando cria uma poção que restaura PV e/ou PM de uma única criatura, você pode fazer com que ela afete até 【NP】 criaturas adicionais. Se fizer isso, a poção restaura apenas metade da quantidade normal de PV e PM para cada criatura." }, { name: "ENGENHOCAS", mult: 5, desc: "Quando adquire este poder pela primeira vez, escolha um tipo de engenhoca: alquimia, infusões ou tecnomagia (veja as pp. 208-211). Você ganha os benefícios básicos desse tipo de engenhoca..." }, { name: "FÓRMULA SECRETA", mult: 5, desc: "Quando cria uma poção ou magisfera cujos efeitos restauram PV e/ou PM, cada recurso restaurado aumenta em 【NP × 5】. Quando cria um fragmento elemental, uma magisfera ou uma poção que cause dano, esse item causa 【NP】 de dano adicional." }, { name: "ITEM EMERGENCIAL", mult: 1, desc: "Uma vez por cena de conflito, quando estiver em crise, você pode fazer mais uma ação no seu turno, mas deve ser a ação Inventário." }, { name: "VISIONÁRIO", mult: 5, desc: "Quando trabalha em um projeto, até 【NP × 100】 zênites do seu custo de material são pagos automaticamente. Além disso, você gera mais 【NP】de progresso todos os dias." }] },
+        { name: "Ladino", bonus: { pv: 0, pm: 0, pi: 2 }, powers: [{ name: "ALTA VELOCIDADE", mult: 3, desc: "No início de um conflito, gaste 10 PM e escolha uma opção: o ataque ganha multi (2); ou você aumenta em um a propriedade multi do ataque, até o máximo de multi (3)." }, { name: "ESQUIVA", mult: 3, desc: "Enquanto não tiver escudos ou armaduras marciais equipadas, sua Defesa aumenta em 【NP】." }, { name: "GOLPE BAJXO", mult: 5, desc: "Quando atinge uma criatura com um ataque, apenas se essa criatura for o alvo e ela estiver sofrendo uma ou mais condições, você causa dano adicional igual a 【NP + o número de condições afetando a criatura】." }, { name: "ROUBO DE ALMA", mult: 5, desc: "Você pode gastar uma ação para fazer um teste de 【DES + VON】 contra a Def.M de uma criatura que você possa ver. Se o alvo for um soldado e você tiver sucesso, recupere 【NP】 PI; se ele for um elite ou um campeão, em vez disso você recebe o tesouro da alma do alvo..." }, { name: "VEJO VOCÊ MAIS TARDE", mult: 1, desc: "Você pode gastar uma ação e 1 Ponto de Fabula para sumir da cena atual, reaparecendo quando quiser durante uma cena diferente em que outro PJ esteja. Descreva como você escapou e milagrosamente apareceu no novo local!" }] },
+        { name: "Mestre de Armas", bonus: { pv: 5, pm: 0, pi: 0 }, powers: [{ name: "CHUVA DE LÂMINAS", mult: 1, desc: "Quando faz um ataque corpo a corpo, você pode gastar 10 PM para escolher uma opção: o ataque ganha multi (2); ou você aumenta em um a propriedade multi do ataque, até o máximo de multi (3)." }, { name: "CONTRA-ATAQUE", mult: 1, desc: "Quando um inimigo atinge ou erra um ataque corpo a corpo contra você, se o resultado do teste de Precisão for um número par, você pode fazer um ataque livre contra esse inimigo (depois que o ataque dele for resolvido)." }, { name: "QUEBRA-OSSOS", mult: 4, desc: "Quando atinge um ou mais alvos com um ataque corpo a corpo que fosse causar dano, você pode escolher não causar dano. Se fizer isso, escolha uma opção: deixar cada alvo atingido pelo ataque atordoado; ou deixar cada alvo atingido fraco; ou cada alvo atingido perde 【NP × 10】 PM." }, { name: "MAESTRIA COM ARMAS CORPO A CORPO", mult: 4, desc: "Você ganha um bônus igual a 【NP】 em testes de Precisão corpo a corpo." }, { name: "TRESPASSAR", mult: 3, desc: "Você pode gastar uma ação e 5 PM para fazer um ataque livre com uma arma corpo a corpo equipada. Este ataque deve ter somente uma criatura como alvo. Se acertar, você não causa dano e escolhe uma opção... ele sofre 【NP × 2】 de dano adicional." }] },
+        { name: "Orador", bonus: { pv: 0, pm: 5, pi: 0 }, powers: [{ name: "ALIADO INESPERADO", mult: 1, desc: "Você pode gastar uma ação e 1 Ponto de Fabula para escolher uma criatura que não seja hostil e seja capaz de ouvir e entender você. Se fizer isso, ela se torna solícita..." }, { name: "CONDENAR", mult: 4, desc: "Você pode gastar uma ação e 5 PM para fazer um teste oposto de 【AST + VON】 contra uma criatura capaz de ouvir e entender suas acusações. Em um sucesso, o alvo perde 【NP × 10】 PM e fica abalado ou atordoado (à sua escolha)." }, { name: "CONFIO EM VOCÊ", mult: 2, desc: "Quando outro PJ capaz de ouvir você fizer um teste, você pode gastar 1 Ponto de Fabula para convocar um dos Traços ou Laços dele, permitindo que ele role dados novamente ou melhore o resultado do teste... Em seguida, se você tem um Laço com o personagem alvo, ele recupera 【NP × 10】 PM." }, { name: "ENCORAJAR", mult: 6, desc: "Durante um conflito, você pode gastar uma ação e 5 PM para escolher outra criatura que possa ver e entender você. Essa criatura recupera 【NP × 5】 PV e escolhe Destreza, Vigor, Astúcia ou Vontade. Até o início do seu próximo turno, o dado atual do Atributo escolhido é considerado um passo maior (máximo de d12)." }, { name: "PERSUASIVO", mult: 2, desc: "Quando passar em um teste para preencher ou apagar as seções de um relógio, se a sua abordagem envolveu charme, diplomacia, enganação ou intimidação, você pode gastar até 【NP × 20】 PM. Se fizer isso, preencha ou apague uma seção adicional desse relógio para cada 20 PM gastos dessa maneira." }] },
+        { name: "Quimerista", bonus: { pv: 0, pm: 5, pi: 0 }, powers: [{ name: "CONSUMIR", mult: 5, desc: "Quando causa dano a uma ou mais criaturas usando um feitiço, caso tenha uma adaga, arma arcana ou malho equipado, você recupera 【NP × 2】 PM." }, { name: "IMITAÇÃO MÁGICA", mult: 10, desc: "Quando vê um feitiço sendo lançado por uma criatura das espécies fera, monstro ou planta, você pode aprendê-lo imediatamente como um de seus feitiços de Quimerista... Você pode memorizar até 【NP + 2】 feitiços de Quimerista diferentes desta maneira." }, { name: "LÍNGUA DAS FERAS", mult: 1, desc: "Você pode se comunicar com criaturas das espécies fera, monstro e planta." }, { name: "PATOGÊNESE", mult: 1, desc: "Quando causa dano a uma ou mais criaturas com um de seus feitiços de Quimerista, alvos que sejam da mesma espécie da criatura com a qual você aprendeu o feitiço ficam envenenados." }, { name: "QUIMERISMO RITUALISTA", mult: 1, desc: "Você pode fazer rituais da disciplina quimerismo. Ao obter este poder, escolha 【AST + VON】ou【VIG + VON】. A partir de agora, seus rituais de quimerismo utilizam os Atributos escolhidos no teste de Magia." }] },
+    ];
+    
+    const heroicPowers = [
+        { name: "Ambidestria", req: null, desc: "Você pode aplicar os benefícios de luta com duas armas a qualquer arma, mesmo às que pertencem a categorias diferentes ou que uma seja corpo a corpo e outra seja à distância." },
+        { name: "Feitiços Extras", req: null, desc: "Quando adquirir este poder, aprenda dois feitiços de uma das seguintes listas: Elementalista, Entropista ou Espiritualista. Ambos os feitiços devem ser da mesma lista e seguir as regras padrão de conjuração da respectiva classe." },
+        { name: "PM Extras", req: null, desc: "Aumente permanentemente seus PM máximos em 10. Se estiver no 40° nível ou acima, esses PM adicionais aumentam para 20." },
+        { name: "PI Extras", req: null, desc: "Aumente permanentemente seus PI máximos em 4." },
+        { name: "PV Extras", req: null, desc: "Aumente permanentemente seus PV máximos em 10. Se estiver no 40° nivel ou acima, esses PV adicionais aumentam para 20." },
+        { name: "Adversidade", req: "Guerreiro Sombrio", desc: "Enquanto estiver sofrendo uma ou mais condições, você ganha +1 em todos os testes e causa 2 de dano adicional (com Arcanos, ataques, feitiços, itens ou qualquer outro método) para cada condição que estiver sofrendo." },
+        { name: "Ataque Poderoso", req: "Furioso ou Mestre de Armas", desc: "Quando você atinge uma ou mais criaturas com um ataque corpo a corpo, esse ataque causa 5 pontos de dano adicional a cada criatura. Se estiver no 40° nível ou acima, esse dano adicional aumenta para 10." },
+        { name: "Bolsos Fundos", req: "Inventor", desc: "Quando usa PI, você gasta 1 PI a menos (mínimo 1)." },
+        { name: "Cometa", req: "Entropista", desc: "Você aprende o feitiço supremo de Entropista: Cometa. Cometa PM: 50 Alvo: especial Duração: instantânea. Você abre um grande portal do Cosmos, convocando uma rocha astral do vazio avassalador..." },
+        { name: "Companheiro Heróico", req: "Andarilho", desc: "O vínculo com seu companheiro fica mais forte. Você ganha os seguintes benefícios: Os PV máximos do companheiro aumentam em 10. Escolha um dos Atributos do companheiro: Destreza, Vigor, Astúcia ou Vontade. O dado básico do Atributo escolhido aumenta em um passo (máximo d12)..." },
+        { name: "Desalmado", req: "Guerreiro Sombrio", desc: "Quando atinge uma criatura com um ataque, se apenas essa criatura for o alvo e você tiver um Laço com ela, pode gastar a metade de seus PV atuais... Se fizer isso, o ataque causa 【10 vezes a força de seu Laço com o alvo】 de dano adicional." },
+        { name: "Domínio Quimérico", req: "Quimerista", desc: "Escolha duas espécies entre construto, demônio, elemental e morto-vivo. Você pode usar seu poder Imitação Mágica para aprender feitiços de criaturas das espécies escolhidas. Este poder heroico pode ser adquirido até duas vezes..." },
+        { name: "Ecos Arcanos", req: "Arcanista", desc: "Se os domínios de um ou mais Arcanos vinculados a você forem aplicáveis a um teste para apagar ou preencher uma ou mais seções de um relógio, ao obter sucesso no teste, você pode apagar ou preencher uma seção adicional desse relógio." },
+        { name: "Esperança", req: "Espiritualista", desc: "Você aprende o feitiço supremo de Espiritualista: Esperança. Esperança PM: 40 Alvo: especial Duração: instantânea. Você reacende as chamas da coragem e da esperança de um herói derrotado. Escolha um PJ que tenha se rendido..." },
+        { name: "Feitiço Poderoso", req: "Elementalista, Entropista, Espiritualista ou Quimerista", desc: "Quando você lança um feitiço que causa dano a uma ou mais criaturas, esse feitiço causa 5 pontos de dano adicional a cada criatura. Se estiver no 40° nível ou acima, esse dano adicional aumenta para 10." },
+        { name: "Golpe Tempestuoso", req: "Mestre de Armas", desc: "Quando faz um ataque corpo a corpo com a propriedade multi, se você escolher como alvo apenas uma criatura, o ataque causa 5 pontos de dano adicional se tiver multi (2) ou 10 pontos de dano adicional se tiver multi (3 ou mais)." },
+        { name: "Imbatível", req: "Guardião", desc: "Uma vez por cena, quando estiver prestes a ficar com 0 PV, em vez disso você pode resistir à dor e ficar com exatamente 1 PV." },
+        { name: "Imunidade à Condição", req: "Andarilho", desc: "Você se torna Imune a uma única condição à sua escolha." },
+        { name: "Matemágica", req: "Erudito", desc: "Quando lança um feitiço com alvo “uma criatura”, você pode dobrar seu custo total de PM. Se fizer isso, escolha um Atributo... O feitiço passa a ter como alvo todas as criaturas em cena cujo dado atual de Atributo seja o que você escolheu..." },
+        { name: "Mão de Gorila", req: "Furioso", desc: "Você pode equipar armas de duas mãos das categorias espada, lança, malho ou pesada em um único espaço de mão." },
+        { name: "Melhoria", req: "Inventor", desc: "Uma vez por descanso, você pode escolher uma opção: adicionar uma habilidade a uma única arma, armadura ou escudo que não tenha nenhuma; ou trocar a habilidade atual de uma única arma, armadura ou escudo." },
+        { name: "Mira Perfeita", req: "Atirador", desc: "Quando atinge uma ou mais criaturas com um ataque à distância e escolhe não causar dano para usar o poder Tiro de Aviso, você pode escolher duas opções em vez de uma..." },
+        { name: "Muralha", req: "Guardião", desc: "No início da primeira rodada de cada cena de conflito, você é Resistente a todos os tipos de dano e não pode sofrer condições... Este benefício dura até o fim da primeira rodada." },
+        { name: "Pilhar", req: "Ladino", desc: "Quando usa Roubo de Alma, você pode escolher como alvo um número qualquer de criaturas ao mesmo tempo..." },
+        { name: "Previsível!", req: "Erudito", desc: "Em um conflito, você pode gastar uma ação e 20 PM para antecipar os próximos movimentos de uma criatura que você possa ver... Se fizer isso, escolha um tipo de ação entre Ataque, Feitiço, Guarda, Objetivo ou Poder. Até o início do seu próximo turno, a criatura deve gastar 20 PM sempre que quiser fazer a ação escolhida." },
+        { name: "Repetição", req: "Orador", desc: "Uma vez por turno em um conflito, após usar o poder Condenar ou Encorajar, você pode imediatamente reutilizá-lo (no mesmo alvo ou em outro). Você ainda deve pagar o custo em PM por esse segundo uso do poder." },
+        { name: "Revelação", req: "Arcanista", desc: "Você faz contato com um Arcano desconhecido, vinculando-o à sua alma. Esse Arcano deve ser criado em conjunto com o grupo; enquanto você viver, ninguém mais no seu mundo pode se vincular ao Arcano criado." },
+        { name: "Retórica Desarmante", req: "Orador", desc: "Durante uma cena de conflito, você pode gastar uma ação para escolher uma criatura de patente soldado que possa ouvir e entender você... Se essa criatura estiver abalada ou em crise, você pode gastar uma quantidade de PM igual a 【20 + metade do nível da criatura alvo】 para fazer com que ela saia do conflito de maneira pacífica." },
+        { name: "Sumir", req: "Ladino", desc: "Quando atinge uma ou mais criaturas com um ataque, você pode gastar 1 Ponto de Fabula. Se fizer isso, até o início do seu próximo turno, nenhuma dessas criaturas pode fazer qualquer ação em que precise enxergar você." },
+        { name: "Tiro Poderoso", req: "Atirador", desc: "Quando atinge uma ou mais criaturas com um ataque à distância, esse ataque causa 5 pontos de dano adicional a cada criatura. Se estiver no 40° nível ou acima, esse dano adicional aumenta para 10." },
+        { name: "Vulcão", req: "Elementalista", desc: "Você aprende o feitiço supremo de Elementalista: Vulcão. Vulcão PM: 40 Alvo: especial Duração: instantânea. Você canaliza a fúria do planeta em uma poderosa onda de fogo e magma..." },
+    ];
+    
+    const equipment = [
+        { name: "Sem Armadura", type: "armadura", cost: 0, def: "des", defM: "ast", init: 0, bonus: { def: 0, defM: 0 } },
+        { name: "Traje de Viagem", type: "armadura", cost: 100, def: "des", defM: "ast", init: -1, bonus: { def: 1, defM: 1 } },
+        { name: "Placa de Bronze", type: "armadura", cost: 200, def: 11, defM: "ast", init: -3, bonus: { def: 0, defM: 0 } },
+        { name: "Brigantina", type: "armadura", cost: 150, def: 10, defM: "ast", init: -2, bonus: { def: 0, defM: 0 } },
+        { name: "Vestes de Sábio", type: "armadura", cost: 200, def: "des", defM: "ast", init: -2, bonus: { def: 1, defM: 2 } },
+        { name: "Escudo de Bronze", type: "escudo", cost: 100, bonus: { def: 2, defM: 0 } },
+        { name: "Escudo Rúnico", type: "escudo", cost: 150, bonus: { def: 2, defM: 2 } },
+        { name: "Espada de Bronze", type: "arma", cost: 200, formula: "DES + VIG +1", damage: "RA + 6", damageType: "físico" },
+        { name: "Machado de Guerra", type: "arma", cost: 250, formula: "VIG + VIG", damage: "RA + 14", damageType: "físico" },
+        { name: "Arco Curto", type: "arma", cost: 200, formula: "DES + DES", damage: "RA + 8", damageType: "físico" },
+        { name: "Cajado", type: "arma", cost: 100, formula: "VON + VON", damage: "RA + 6", damageType: "físico" },
+        { name: "Pistola", type: "arma", cost: 250, formula: "DES + AST", damage: "RA + 8", damageType: "físico" },
+    ];
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const classSelectorTemplate = document.createElement('template');
+        classSelectorTemplate.innerHTML = `
+            <div class="class-entry flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-4 p-4 rounded-lg bg-gray-700">
+                <select class="class-selector w-full md:w-1/3 p-2 rounded-lg border">
+                    <option value="">Selecione uma Classe</option>
+                </select>
+                <div class="flex items-center space-x-2">
+                    <label for="class-level" class="text-sm">Nível:</label>
+                    <input type="number" value="0" min="0" max="10" class="class-level-input w-16 p-2 rounded-lg border">
+                </div>
+                <button class="btn-remove self-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.728-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+                <div class="w-full md:w-1/2 space-y-2 power-selection-container"></div>
+            </div>
+        `;
+        const lacoTemplate = document.createElement('template');
+        lacoTemplate.innerHTML = `
+            <div class="laco-entry flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-4 p-4 rounded-lg bg-gray-700">
+                <div class="input-group flex-1">
+                    <label for="laco-alvo" class="block text-sm">Alvo:</label>
+                    <input type="text" class="laco-alvo w-full p-2 rounded-lg border bg-gray-600">
+                </div>
+                <div class="input-group flex-1">
+                    <label class="block text-sm">Emoções:</label>
+                    <div class="flex flex-col space-y-1">
+                        <select class="laco-tipo w-full p-2 rounded-lg border bg-gray-600">
+                            <option value="">Admiração ou Inferioridade</option>
+                            <option value="Admiração">Admiração</option>
+                            <option value="Inferioridade">Inferioridade</option>
+                        </select>
+                        <select class="laco-tipo w-full p-2 rounded-lg border bg-gray-600">
+                            <option value="">Lealdade ou Desconfiança</option>
+                            <option value="Lealdade">Lealdade</option>
+                            <option value="Desconfiança">Desconfiança</option>
+                        </select>
+                        <select class="laco-tipo w-full p-2 rounded-lg border bg-gray-600">
+                            <option value="">Afeto ou Ódio</option>
+                            <option value="Afeto">Afeto</option>
+                            <option value="Ódio">Ódio</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="laco-forca" class="block text-sm">Força:</label>
+                    <span class="laco-forca text-lg font-bold">0</span>
+                </div>
+                <button class="btn-remove self-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.728-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+        `;
+        const classContainer = document.getElementById('class-container');
+        const addClassBtn = document.getElementById('add-class-btn');
+        const levelInput = document.getElementById('level');
+        const totalLevelsSpan = document.getElementById('total-levels');
+        const maxLevelsSpan = document.getElementById('max-levels');
+        const diceSelectors = {
+            des: document.getElementById('des-dice'),
+            vig: document.getElementById('vig-dice'),
+            ast: document.getElementById('ast-dice'),
+            von: document.getElementById('von-dice')
+        };
+        const statOutputs = {
+            pvMax: document.getElementById('pv-max'),
+            pmMax: document.getElementById('pm-max'),
+            piMax: document.getElementById('pi-max'),
+            initiative: document.getElementById('initiative'),
+            defense: document.getElementById('defense'),
+            magicDefense: document.getElementById('magic-defense')
+        };
+        const equipmentOptions = document.getElementById('equipment-options');
+        const zenithBudget = document.getElementById('zenith-budget');
+        const purchasedEquipmentList = document.getElementById('purchased-equipment-list');
+        const downloadJsonBtn = document.getElementById('download-json-btn');
+        const charInfo = {
+            name: document.getElementById('char-name'),
+            identity: document.getElementById('char-identity'),
+            theme: document.getElementById('char-theme'),
+            origin: document.getElementById('char-origin'),
+        };
+        const heroicPowersContainer = document.getElementById('heroic-powers-container');
+        const addHeroicPowerBtn = document.getElementById('add-heroic-power-btn');
+        const lacosContainer = document.getElementById('lacos-container');
+        const addLacoBtn = document.getElementById('add-laco-btn');
+        
+        const state = {
+            level: 1,
+            selectedClasses: [],
+            dice: { des: 6, vig: 6, ast: 6, von: 6 },
+            equipment: [],
+            heroicPowers: [],
+            lacos: [],
+            equipmentCost: 0,
+            pvBonus: 0,
+            pmBonus: 0,
+            piBonus: 0
+        };
+
+        const updateZenithBudget = () => {
+            const initialBudget = 500;
+            const currentCost = state.equipment.reduce((sum, item) => sum + (item.cost || 0), 0);
+            zenithBudget.textContent = `${initialBudget - currentCost}z`;
+        };
+
+        const renderPurchasedItems = () => {
+            purchasedEquipmentList.innerHTML = '';
+            state.equipment.forEach(item => {
+                const li = document.createElement('li');
+                li.classList.add('flex', 'items-center', 'justify-between', 'bg-gray-700', 'p-2', 'rounded-lg');
+                li.textContent = `${item.name} (${item.cost}z)`;
+                const removeBtn = document.createElement('button');
+                removeBtn.classList.add('btn-remove');
+                removeBtn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.728-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                `;
+                removeBtn.onclick = () => {
+                    state.equipment = state.equipment.filter(eq => eq.name !== item.name);
+                    renderEquipmentOptions();
+                    renderPurchasedItems();
+                    calculateStats();
+                };
+                li.appendChild(removeBtn);
+                purchasedEquipmentList.appendChild(li);
+            });
+        };
+
+        const renderEquipmentOptions = () => {
+            equipmentOptions.innerHTML = '';
+            const initialBudget = 500;
+            const currentCost = state.equipment.reduce((sum, item) => sum + (item.cost || 0), 0);
+
+            equipment.forEach(item => {
+                const isSelected = state.equipment.some(eq => eq.name === item.name);
+                const button = document.createElement('button');
+                button.textContent = `${item.name} (${item.cost}z)`;
+                button.classList.add('btn', 'p-2', 'text-xs', 'rounded-lg', 'font-bold', 'uppercase', 'text-white');
+                
+                if (isSelected) {
+                    button.classList.add('bg-green-600');
+                    button.disabled = false;
+                } else if (item.cost > (initialBudget - currentCost)) {
+                    button.classList.add('bg-gray-500', 'cursor-not-allowed');
+                    button.disabled = true;
+                } else {
+                    button.classList.add('bg-blue-500', 'hover:bg-blue-600');
+                    button.disabled = false;
+                }
+
+                button.onclick = () => {
+                    const existingItemIndex = state.equipment.findIndex(eq => eq.type === item.type);
+                    if (isSelected) {
+                        state.equipment = state.equipment.filter(eq => eq.name !== item.name);
+                    } else {
+                        if (item.type === 'armadura' || item.type === 'escudo') {
+                             if (existingItemIndex > -1) {
+                                state.equipment.splice(existingItemIndex, 1);
+                            }
+                        }
+                        state.equipment.push(item);
+                    }
+                    renderEquipmentOptions();
+                    renderPurchasedItems();
+                    calculateStats();
+                };
+                equipmentOptions.appendChild(button);
+            });
+            updateZenithBudget();
+        };
+
+        const calculateStats = () => {
+            state.level = parseInt(levelInput.value, 10);
+            if (isNaN(state.level) || state.level < 1) state.level = 1;
+
+            const totalLevels = state.selectedClasses.reduce((sum, entry) => sum + (entry.level || 0), 0);
+            totalLevelsSpan.textContent = totalLevels;
+            maxLevelsSpan.textContent = state.level;
+
+            const basePV = state.level + (5 * state.dice.vig);
+            const basePM = state.level + (5 * state.dice.von);
+            let pvBonus = 0;
+            let pmBonus = 0;
+            let piBonus = 0;
+            let defenseBonus = 0;
+            let magicDefenseBonus = 0;
+            let initiativePenalty = 0;
+            let defValue = state.dice.des;
+
+            state.selectedClasses.forEach(entry => {
+                const classData = classes.find(c => c.name === entry.name);
+                if (classData && entry.level > 0) {
+                    if (classData.bonus.pv) pvBonus += classData.bonus.pv;
+                    if (classData.bonus.pm) pmBonus += classData.bonus.pm;
+                    if (classData.bonus.pi) piBonus += classData.bonus.pi;
+                }
+            });
+
+            state.equipment.forEach(item => {
+                if (item.type === 'armadura') {
+                    if (typeof item.def === 'number') {
+                        defValue = item.def;
+                    } else {
+                        defValue = state.dice.des;
+                        defenseBonus += item.bonus.def;
+                    }
+                    magicDefenseBonus += item.bonus.defM;
+                    initiativePenalty += item.init;
+                }
+                if (item.type === 'escudo') {
+                    defenseBonus += item.bonus.def;
+                    magicDefenseBonus += item.bonus.defM;
+                }
+            });
+
+            const totalPV = basePV + pvBonus;
+            const totalPM = basePM + pmBonus;
+            const totalPI = 6 + piBonus;
+            const finalDefense = defValue + defenseBonus;
+            const finalMagicDefense = state.dice.ast + magicDefenseBonus;
+            const finalInitiative = 0 + initiativePenalty;
+
+            statOutputs.pvMax.textContent = totalPV;
+            statOutputs.pmMax.textContent = totalPM;
+            statOutputs.piMax.textContent = totalPI;
+            statOutputs.initiative.textContent = finalInitiative;
+            statOutputs.defense.textContent = finalDefense;
+            statOutputs.magicDefense.textContent = finalMagicDefense;
+        };
+        
+        const updateClassLevels = () => {
+            const entries = classContainer.querySelectorAll('.class-entry');
+            state.selectedClasses = Array.from(entries).map(entry => {
+                const selector = entry.querySelector('.class-selector');
+                const levelInput = entry.querySelector('.class-level-input');
+                const powerSelectors = entry.querySelectorAll('.power-selector');
+                const selectedPowers = Array.from(powerSelectors).map(ps => {
+                    const powerName = ps.value;
+                    const powerItem = ps.closest('.power-item');
+                    const powerLevel = powerItem ? parseInt(powerItem.dataset.level) : 1;
+                    return { name: powerName, level: powerLevel };
+                }).filter(p => p.name);
+                return { name: selector.value, level: parseInt(levelInput.value, 10) || 0, powers: selectedPowers };
+            }).filter(entry => entry.name);
+            
+            const totalLevels = state.selectedClasses.reduce((sum, entry) => sum + (entry.level || 0), 0);
+            totalLevelsSpan.textContent = totalLevels;
+            calculateStats();
+        };
+
+        const renderPowerSelectors = (classEntry, className) => {
+            const container = classEntry.querySelector('.power-selection-container');
+            if (!container) return;
+            container.innerHTML = '';
+            const classData = classes.find(c => c.name === className);
+            const classLevel = parseInt(classEntry.querySelector('.class-level-input').value, 10) || 0;
+            let levelsUsed = 0;
+
+            if (classData && classLevel > 0) {
+                for (let i = 0; i < classLevel; i++) {
+                    const powerItem = document.createElement('div');
+                    powerItem.classList.add('power-item', 'space-y-1', 'p-2', 'bg-gray-800', 'rounded-lg');
+                    powerItem.dataset.level = '1';
+                    
+                    const powerSelectWrapper = document.createElement('div');
+                    powerSelectWrapper.classList.add('flex', 'items-center', 'space-x-2');
+
+                    const powerSelector = document.createElement('select');
+                    powerSelector.classList.add('power-selector', 'w-full', 'p-2', 'rounded-lg', 'border');
+                    
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = "";
+                    defaultOption.textContent = `Poder de Classe ${i + 1}`;
+                    powerSelector.appendChild(defaultOption);
+
+                    classData.powers.forEach(power => {
+                        const option = document.createElement('option');
+                        option.value = power.name;
+                        option.textContent = power.name + (power.mult > 1 ? ` (⭐${power.mult})` : '');
+                        powerSelector.appendChild(option);
+                    });
+
+                    const powerControls = document.createElement('div');
+                    powerControls.classList.add('power-level-controls');
+                    
+                    const powerLevelDisplay = document.createElement('span');
+                    powerLevelDisplay.classList.add('power-level-display');
+                    powerLevelDisplay.textContent = '1';
+
+                    const powerLevelUpBtn = document.createElement('button');
+                    powerLevelUpBtn.classList.add('power-level-btn');
+                    powerLevelUpBtn.textContent = '+';
+                    
+                    const powerLevelDownBtn = document.createElement('button');
+                    powerLevelDownBtn.classList.add('power-level-btn');
+                    powerLevelDownBtn.textContent = '-';
+
+                    powerControls.appendChild(powerLevelDownBtn);
+                    powerControls.appendChild(powerLevelDisplay);
+                    powerControls.appendChild(powerLevelUpBtn);
+                    
+                    powerSelectWrapper.appendChild(powerSelector);
+                    powerSelectWrapper.appendChild(powerControls);
+                    powerItem.appendChild(powerSelectWrapper);
+
+                    const powerDesc = document.createElement('p');
+                    powerDesc.classList.add('text-sm', 'text-gray-400', 'pl-2', 'hidden');
+                    powerItem.appendChild(powerDesc);
+
+                    powerSelector.addEventListener('change', (e) => {
+                        const selectedPowerName = e.target.value;
+                        const selectedPower = classData.powers.find(p => p.name === selectedPowerName);
+                        if (selectedPower) {
+                            powerDesc.textContent = selectedPower.desc;
+                            powerDesc.classList.remove('hidden');
+                            powerItem.dataset.level = 1;
+                            powerLevelDisplay.textContent = 1;
+                        } else {
+                            powerDesc.textContent = '';
+                            powerDesc.classList.add('hidden');
+                            powerItem.dataset.level = 1;
+                            powerLevelDisplay.textContent = 1;
+                        }
+                        updateClassLevels();
+                    });
+
+                    powerLevelUpBtn.addEventListener('click', () => {
+                        const currentLevel = parseInt(powerItem.dataset.level);
+                        const selectedPowerName = powerSelector.value;
+                        const selectedPower = classData.powers.find(p => p.name === selectedPowerName);
+                        const totalPowerLevels = Array.from(container.querySelectorAll('.power-item')).reduce((sum, el) => sum + parseInt(el.dataset.level), 0);
+                        
+                        if (selectedPower && selectedPower.mult > 1 && currentLevel < selectedPower.mult && totalPowerLevels < classLevel) {
+                            powerItem.dataset.level = currentLevel + 1;
+                            powerLevelDisplay.textContent = currentLevel + 1;
+                            updateClassLevels();
+                        }
+                    });
+
+                    powerLevelDownBtn.addEventListener('click', () => {
+                        const currentLevel = parseInt(powerItem.dataset.level);
+                        if (currentLevel > 1) {
+                            powerItem.dataset.level = currentLevel - 1;
+                            powerLevelDisplay.textContent = currentLevel - 1;
+                            updateClassLevels();
+                        }
+                    });
+                    
+                    container.appendChild(powerItem);
+                }
+            }
+        };
+
+        const addClassSelector = () => {
+            const newEntry = classSelectorTemplate.content.cloneNode(true);
+            const entryElement = newEntry.querySelector('.class-entry');
+            const selector = entryElement.querySelector('.class-selector');
+            const levelInput = entryElement.querySelector('.class-level-input');
+            const removeBtn = entryElement.querySelector('.btn-remove');
+            
+            classes.forEach(c => {
+                const option = document.createElement('option');
+                option.value = c.name;
+                option.textContent = c.name;
+                selector.appendChild(option);
+            });
+            
+            removeBtn.addEventListener('click', () => {
+                entryElement.remove();
+                updateClassLevels();
+            });
+
+            selector.addEventListener('change', (e) => {
+                renderPowerSelectors(e.target.closest('.class-entry'), e.target.value);
+                updateClassLevels();
+            });
+            levelInput.addEventListener('input', (e) => {
+                renderPowerSelectors(e.target.closest('.class-entry'), selector.value);
+                updateClassLevels();
+            });
+            
+            classContainer.appendChild(entryElement);
+            updateClassLevels();
+        };
+        
+        const updateHeroicPowers = () => {
+            const entries = heroicPowersContainer.querySelectorAll('.heroic-power-entry');
+            state.heroicPowers = Array.from(entries).map(entry => {
+                const name = entry.querySelector('.heroic-power-selector').value;
+                return { name };
+            }).filter(p => p.name);
+        };
+        
+        const addHeroicPowerSelector = () => {
+            const newEntry = document.createElement('div');
+            newEntry.classList.add('heroic-power-entry', 'flex', 'flex-col', 'space-y-2', 'md:flex-row', 'md:space-y-0', 'md:space-x-4', 'p-4', 'rounded-lg', 'bg-gray-700', 'items-start', 'md:items-center');
+            
+            const selector = document.createElement('select');
+            selector.classList.add('heroic-power-selector', 'w-full', 'md:w-1/3', 'p-2', 'rounded-lg', 'border');
+            
+            const defaultOption = document.createElement('option');
+            defaultOption.value = "";
+            defaultOption.textContent = "Selecione um Poder Heróico";
+            selector.appendChild(defaultOption);
+            
+            heroicPowers.forEach(p => {
+                const option = document.createElement('option');
+                option.value = p.name;
+                option.textContent = p.name + (p.req ? ` (Req: ${p.req})` : '');
+                selector.appendChild(option);
+            });
+            
+            const powerDesc = document.createElement('p');
+            powerDesc.classList.add('text-sm', 'text-gray-400', 'md:w-2/3', 'pl-2', 'hidden');
+
+            const removeBtn = document.createElement('button');
+            removeBtn.classList.add('btn-remove', 'self-center');
+            removeBtn.innerHTML = `
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.728-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+            `;
+
+            selector.addEventListener('change', (e) => {
+                const selectedPower = heroicPowers.find(p => p.name === e.target.value);
+                if (selectedPower) {
+                    powerDesc.textContent = selectedPower.desc;
+                    powerDesc.classList.remove('hidden');
+                } else {
+                    powerDesc.classList.add('hidden');
+                }
+                updateHeroicPowers();
+            });
+            removeBtn.addEventListener('click', () => {
+                newEntry.remove();
+                updateHeroicPowers();
+            });
+            
+            newEntry.appendChild(selector);
+            newEntry.appendChild(removeBtn);
+            newEntry.appendChild(powerDesc);
+            heroicPowersContainer.appendChild(newEntry);
+        };
+
+        const updateLacos = () => {
+            const lacosEntries = lacosContainer.querySelectorAll('.laco-entry');
+            state.lacos = Array.from(lacosEntries).map(entry => {
+                const alvo = entry.querySelector('.laco-alvo').value;
+                const tipos = Array.from(entry.querySelectorAll('.laco-tipo')).map(s => s.value).filter(v => v);
+                const forca = tipos.length;
+                entry.querySelector('.laco-forca').textContent = forca;
+                return { alvo, tipos, forca };
+            }).filter(l => l.alvo);
+        };
+
+        const addLaco = () => {
+            const newEntry = lacoTemplate.content.cloneNode(true);
+            const entryElement = newEntry.querySelector('.laco-entry');
+            const removeBtn = entryElement.querySelector('.btn-remove');
+            
+            removeBtn.addEventListener('click', () => {
+                entryElement.remove();
+                updateLacos();
+            });
+
+            entryElement.querySelector('.laco-alvo').addEventListener('input', updateLacos);
+            entryElement.querySelectorAll('.laco-tipo').forEach(select => {
+                select.addEventListener('change', updateLacos);
+            });
+
+            lacosContainer.appendChild(entryElement);
+            updateLacos();
+        };
+
+        addClassBtn.addEventListener('click', addClassSelector);
+        addHeroicPowerBtn.addEventListener('click', addHeroicPowerSelector);
+        addLacoBtn.addEventListener('click', addLaco);
+        
+        levelInput.addEventListener('input', calculateStats);
+
+        Object.keys(diceSelectors).forEach(key => {
+            diceSelectors[key].addEventListener('change', (e) => {
+                state.dice[key] = parseInt(e.target.value, 10);
+                calculateStats();
+            });
+        });
+
+        const downloadJson = () => {
+            const sheet = {
+                lvl: state.level,
+                info: {
+                    zenit: parseInt(zenithBudget.textContent),
+                    bonds: state.lacos.map(l => ({
+                        name: l.alvo,
+                        affection: l.tipos.includes('Afeto'),
+                        admiration: l.tipos.includes('Admiração'),
+                        loyalty: l.tipos.includes('Lealdade'),
+                        inferiority: l.tipos.includes('Inferioridade'),
+                        hatred: l.tipos.includes('Ódio'),
+                        mistrust: l.tipos.includes('Desconfiança')
+                    })),
+                    description: "",
+                    theme: charInfo.theme.value || 'N/A',
+                    origin: charInfo.origin.value || 'N/A',
+                    pronouns: "",
+                    fabulapoints: 3,
+                    exp: 0,
+                    imgurl: "",
+                    identity: charInfo.identity.value || 'N/A',
+                },
+                modifiers: {
+                    mp: 0, rangedPrec: 0, def: 0, mdef: 0, init: 0, magicPrec: 0, meleePrec: 0, hp: 0, ip: 0,
+                },
+                weapons: [],
+                uid: crypto.randomUUID(),
+                name: charInfo.name.value || 'N/A',
+                quirk: { name: "", description: "", effect: "" },
+                attributes: {
+                    insight: state.dice.ast,
+                    might: state.dice.vig,
+                    dexterity: state.dice.des,
+                    willpower: state.dice.von,
+                },
+                stats: {
+                    ip: { current: parseInt(statOutputs.piMax.textContent), max: parseInt(statOutputs.piMax.textContent) },
+                    mp: { current: parseInt(statOutputs.pmMax.textContent), max: parseInt(statOutputs.pmMax.textContent) },
+                    hp: { current: parseInt(statOutputs.pvMax.textContent), max: parseInt(statOutputs.pvMax.textContent) },
+                },
+                statuses: {
+                    shaken: false, poisoned: false, enraged: false, dexUp: false, insUp: false,
+                    slow: false, migUp: false, weak: false, wlpUp: false, dazed: false,
+                },
+                notes: [],
+                armor: [],
+                classes: state.selectedClasses.map(c => {
+                    const classData = classes.find(cl => cl.name === c.name);
+                    return {
+                        benefits: {
+                            martials: {
+                                ranged: false, armor: false, shields: false, melee: false
+                            },
+                            rituals: { ritualism: false },
+                            hpplus: classData.bonus.pv, mpplus: classData.bonus.pm, ipplus: classData.bonus.pi,
+                            isCustomBenefit: false, spellClasses: ["default"],
+                        },
+                        lvl: c.level,
+                        name: c.name,
+                        skills: classData.powers.map(p => ({
+                            maxLvl: p.mult,
+                            skillName: p.name,
+                            specialSkill: "",
+                            currentLvl: c.powers.find(cp => cp.name === p.name)?.level || 0,
+                            description: p.desc
+                        })),
+                        heroic: { name: "", description: "" },
+                        isHomebrew: false,
+                        spells: [],
+                        id: crypto.randomUUID().slice(0, 20).replace(/-/g, ''),
+                    };
+                }),
+                id: crypto.randomUUID().slice(0, 20).replace(/-/g, ''),
+                dataType: "pc",
+            };
+
+            const jsonString = JSON.stringify(sheet, null, 2);
+            const blob = new Blob([jsonString], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `${charInfo.name.value || "ficha_personagem"}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
+
+        downloadJsonBtn.addEventListener('click', downloadJson);
+
+        // Initialize with one class and one heroic power selector
+        addClassSelector();
+        addHeroicPowerSelector();
+        
+        // Initial rendering and calculations
+        renderEquipmentOptions();
+        renderPurchasedItems();
+        calculateStats();
+    });
+</script>
+
+</body>
+</html>
